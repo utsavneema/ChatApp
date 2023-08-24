@@ -1,6 +1,6 @@
 const express = require("express");
-const expressWs = require("express-ws");
-const WebSocket = require("ws");
+// const expressWs = require("express-ws");
+// const WebSocket = require("ws");
 const router = express.Router();
 const dotenv= require('dotenv');
 const mysql = require("mysql");
@@ -14,46 +14,43 @@ const jwtKey = 'hello';
 const cors = require('cors');
 const http = require("http");
 
-const app = express();
 
-const server = http.createServer(app);
+const app = express()
+const server = require('http').createServer(app);
+const WebSocket = require('ws');
+
 const wss = new WebSocket.Server({ server });
-// const wss = expressWsInstance.getWss();
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     try {
       const parsedMessage = JSON.parse(message);
-      console.log(parsedMessage);
+
       
-      if (parsedMessage.image) {
-        const senderName = parsedMessage.sender;
-        const imageBase64 = parsedMessage.image;
-
-       
-        wss.clients.forEach(function each(client) {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              sender: senderName,
-              image: imageBase64,
-            }));
-          }
-        });
-      } else if (parsedMessage.text) {
-        // Handle text messages
-        console.log('Received text message from', parsedMessage.sender, ':', parsedMessage.text);
-
-        wss.clients.forEach(function each(client) {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(parsedMessage));
-          }
-        });
+      if (parsedMessage.imageUrl && parsedMessage.sender) {
+        // console.log('Received image message from', parsedMessage.sender);
+      }else if(parsedMessage.videoUrl && parsedMessage.sender){
+        console.log('Received video message from', parsedMessage.sender);
+      } 
+      else if(parsedMessage.audioUrl && parsedMessage.sender){
+        console.log('Received audio message from', parsedMessage.sender);
+      } 
+      else if (parsedMessage.text && parsedMessage.sender) {
+        
+        // console.log('Received plain text message from', parsedMessage.sender, ':', parsedMessage.text);
       }
+
+      wss.clients.forEach(function each(client) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(parsedMessage));
+        }
+      });
     } catch (error) {
       console.error('Error parsing JSON:', error);
     }
   });
 });
+
 
 
 
@@ -228,6 +225,23 @@ router.get("/room-details", authMiddleWare, async function (req, res, next) {
     return res.status(500).json({ status: false, error: "Failed to fetch room details" });
   }
 });
+//*************************************************************************************************************************** */
+router.post("/upload-video", function (req, res, next) {
+  const file1 = _.get(req, "files.userfile");
+  const videoName = parseInt(Math.random() * 100000);
+  const path = videoName;
+  file1.mv("./public/videos/" + videoName);
+  return res.status(200).json({ status: true, message: "success", file1, path });
+});
+
+//************************************************************************************************************************ */
+router.post("/upload-audio", function (req, res, next) {
+  const file1 = _.get(req, "files.audiofile");
+  const audioName = parseInt(Math.random() * 100000);
+  const path = audioName;
+  file1.mv("./public/audios/" + audioName);
+  return res.status(200).json({ status: true, message: "success", file1, path });
+});
 
 //******************************************************************************************************************************* */
 router.post("/chats", async function (req, res, next) {
@@ -266,5 +280,5 @@ router.post("/chats", async function (req, res, next) {
 //******************************************************************************************************************* */
 module.exports = router;
 
-// const port = 8000;
-// server.listen(port, () => console.log(`Listening on port: 8000`));
+const port = 8000;
+server.listen(port, () => console.log(`Listening on port: 8000`));

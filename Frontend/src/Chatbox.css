@@ -34,3 +34,33 @@
     margin-bottom: 5px;
   }
   
+
+  .video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px; /* Adjust as needed */
+  }
+  
+  .video-container video {
+    max-width: 100%; /* Ensure video doesn't exceed its container */
+  }
+  
+  .download-link {
+    font-size: 30px; /* Adjust the font size as needed */
+    margin-top: 10px; /* Adjust spacing between video and download link */
+  }
+  
+
+  .audio-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+
+
+  .selected-user {
+    color: black; 
+    font-weight: bold;
+  }
+  

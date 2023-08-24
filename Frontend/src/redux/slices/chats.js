@@ -19,10 +19,10 @@ export const fetchChats = createAsyncThunk("user/fetchchats", async (receiverId)
           receiverId: receiverId,
         },
       });
-      // console.log("Chat Details API Response:", response.data);
       return response.data.chatDetails;
     } catch (error) {
-      throw new Error(error.response.data);    }
+      throw new Error(error.response.data);
+    }
   }
 });
 
@@ -33,10 +33,7 @@ const chatSlice = createSlice({
     addMessage: (state, action) => {
       const existingMessageIndex = state.chats.findIndex(
         (message) =>
-      //     message.type === action.payload.type &&
-      // message.content === action.payload.content &&
-      // message.sender === action.payload.sender
-         message.text === action.payload.text &&
+          message.text === action.payload.text &&
           message.sender === action.payload.sender
       );
 
@@ -45,8 +42,7 @@ const chatSlice = createSlice({
       }
     },
 
-    
-    createChatRoom(state, action) {
+    createChatRoom: (state, action) => {
       const existingChatRoom = state.chats.find(
         (chat) =>
           (chat.user1 === action.payload.user1 && chat.user2 === action.payload.user2) ||
@@ -61,15 +57,14 @@ const chatSlice = createSlice({
         });
       }
     },
-    extraReducers: (builder) => {
+  },
+  extraReducers: (builder) => {
     builder.addCase(fetchChats.fulfilled, (state, action) => {
       state.chats = action.payload;
     });
   },
-}
 });
 
-
-export const { addMessage, createChatRoom, sendMessage } = chatSlice.actions;
+export const { addMessage, createChatRoom } = chatSlice.actions;
 
 export default chatSlice.reducer;

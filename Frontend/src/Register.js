@@ -33,7 +33,9 @@ const Register = () => {
 
   return (
     <div>
+      
         <center>
+
           <div
             style={{
               backdropFilter: 'blur(5px)',
@@ -45,7 +47,10 @@ const Register = () => {
               flexDirection: 'column',
             }}
           >
-            <h4>Please Enter Details to Register</h4>
+          <h2>Welcome to ChatOn</h2>
+          <br/> <br/>
+            <h4>Please Register</h4>
+            <br/>
             <Card style={{ width: '18rem' }}>
               <Card.Body style={{ backgroundColor: 'rgb(208, 208, 208)', color: 'white' }}>
                 <Card.Title style={{color:'black'}}>Create Account</Card.Title>

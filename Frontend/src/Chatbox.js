@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from 'react-bootstrap';
 import Sendmessage from './Sendmessage';
 import { addMessage } from './redux/slices/chats';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,69 +26,53 @@ const Chatbox = () => {
       
     });
 
+  
     newSocket.addEventListener('message', function (event) {
       const receivedMessage = JSON.parse(event.data);
-    
       if (receivedMessage) {
-        if (receivedMessage.image && receivedMessage.sender) {
-          dispatch(addMessage({
-            text: null, 
-            sender: receivedMessage.sender,
-            imageUrl: receivedMessage.image,
-          }));
-        } else if (receivedMessage.text && receivedMessage.sender) {
-          
-          const plainTextMessage = receivedMessage.text;
-          dispatch(addMessage({ text: plainTextMessage, sender: receivedMessage.sender }));
+        if (receivedMessage.imageUrl) {
+          dispatch(addMessage({ imageUrl: receivedMessage.imageUrl, sender: receivedMessage.sender }));
+        }
+        else if (receivedMessage.videoUrl) {
+          dispatch(addMessage({ videoUrl: receivedMessage.videoUrl, sender: receivedMessage.sender }));
+        }
+        else if (receivedMessage.audioUrl) {
+          dispatch(addMessage({ audioUrl: receivedMessage.audioUrl, sender: receivedMessage.sender }));
+        }
+        else if (receivedMessage.text) {
+        dispatch(addMessage({ text: receivedMessage.text, sender: receivedMessage.sender }));
         }
       }
     });
-
     
-  
-    newSocket.addEventListener('close', (event) => {
-      console.log('WebSocket connection closed with code:', event.code);
-    console.log('WebSocket close reason:', event.reason);
 
+    newSocket.addEventListener('close', () => {
+      console.log('WebSocket connection closed.');
     });
 
     newSocket.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error.message);
+      console.error('WebSocket error:', error);
     });
 
-    const broadcastChannel = new BroadcastChannel('chat_channel');
-    broadcastChannel.addEventListener('message', function (event) {
-      const receivedMessage = event.data;
-      console.log('Dispatching to Redux:', receivedMessage);
-      dispatch(addMessage(receivedMessage));
-    });
+    // const broadcastChannel = new BroadcastChannel('chat_channel');
+    // broadcastChannel.addEventListener('message', function (event) {
+    //   const receivedMessage = event.data;
+    //   console.log('Dispatching to Redux:', receivedMessage);
+    //   dispatch(addMessage(receivedMessage));
+    // });
     
     return () => {
       newSocket.close();
-      broadcastChannel.removeEventListener('message');
+      //  broadcastChannel.removeEventListener('message');
     };
   }, []);
 
-  // const handleSendMessage = (text) => {
-  //   const newMessage = { text, sender: currentUser};
-  //   socket?.send(JSON.stringify(newMessage));
-  //   console.log('Dispatching to Redux:', newMessage);
-  //   dispatch(addMessage(newMessage));
-  // };
-  const handleSendMessage = (text, image) => {
-    // console.log('Sending message:', text, image);
-    const newMessage = {
-      text,
-      sender: currentUser,
-      image:image,
-    };
-  
+  const handleSendMessage = (text, imageUrl, videoUrl, audioUrl) => {
+    const newMessage = { text, imageUrl, videoUrl,audioUrl, sender: currentUser };
     socket?.send(JSON.stringify(newMessage));
-    console.log('Message sent:', newMessage);
-
+    console.log('Dispatching to Redux:', newMessage);
+    dispatch(addMessage(newMessage));
   };
-  
-  
 
   useEffect(()=>{
     getUserDetail();
@@ -104,7 +89,7 @@ const Chatbox = () => {
           },
         });
 
-        const {userDetails } = response.data;
+        const { status, userDetails } = response.data;
         setCurrentUser(userDetails.name);
       } catch (error) {
         console.error('Error', error);
@@ -124,14 +109,14 @@ const Chatbox = () => {
           padding: "10px",
         }}
       >
-        <i
+       <i
                   className="fa fa-user-circle-o"
                   aria-hidden="true"
                   style={{
                     fontSize: "18px",
                     color: "black",
                     width: "50px",
-                    height: "20px",
+                    height: "30px",
                     borderRadius: "50%",
                     marginRight: "10px",
                     display: "flex",
@@ -150,7 +135,7 @@ const Chatbox = () => {
             alignItems: "center",
           }}
         >
-          <i
+          {/* <i
             className="fa fa-search"
             aria-hidden="true"
             style={{ fontSize: "18px", color: "black", marginRight: "25px" }}
@@ -158,7 +143,7 @@ const Chatbox = () => {
           <div
             className="fa fa-ellipsis-v"
             style={{ fontSize: "18px", color: "black", marginRight: "15px" }}
-          ></div>
+          ></div> */}
         </Link>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
@@ -170,53 +155,125 @@ const Chatbox = () => {
     parsedMessage = null;
   }
 
-  if (parsedMessage && parsedMessage.text) {
-    return (
-      <div
-        key={index}
-        className={`message-container ${
-          message.sender === currentUser ? 'my-message' : 'other-message'
-        }`}
-      >
+  if (parsedMessage) {
+    if (parsedMessage.imageUrl) {
+      return (
         <div
-          className={`message ${
-            message.sender === currentUser ? 'my-message-content' : 'other-message-content'
+          key={index}
+          className={`message-container ${
+            message.sender === currentUser ? 'my-message' : 'other-message'
           }`}
         >
-          {message.sender !== currentUser && (
-            <div className="sender-name">{message.sender}</div>
-          )}
-          {parsedMessage.text}
-        </div>
-      </div>
-    );
-  } else if (parsedMessage && parsedMessage.imageUrl) {
-    return (
-      <div
-        key={index}
-        className={`message-container ${
-          message.sender === currentUser ? 'my-message' : 'other-message'
-        }`}
-      >
-        <div
-          className={`message ${
-            message.sender === currentUser ? 'my-message-content' : 'other-message-content'
-          }`}
-        >
-          {message.sender !== currentUser && (
-            <div className="sender-name">{message.sender}</div>
-          )}
-          <div>
-            <img src={parsedMessage.imageUrl} alt="Image" />
+          <div
+            className={`message ${
+              message.sender === currentUser ? 'my-message-content' : 'other-message-content'
+            }`}
+          >
+            {message.sender !== currentUser && (
+              <div className="sender-name">{message.sender}</div>
+            )}
+            <img src={parsedMessage.imageUrl} alt="Received Image" className="received-image" />
           </div>
         </div>
-      </div>
-    );
-  }
-   else {
+      );
+    }
+    else if (parsedMessage.text) {
+      return (
+        <div
+          key={index}
+          className={`message-container ${
+            message.sender === currentUser ? 'my-message' : 'other-message'
+          }`}
+        >
+          <div
+            className={`message ${
+              message.sender === currentUser ? 'my-message-content' : 'other-message-content'
+            }`}
+          >
+            {message.sender !== currentUser && (
+              <div className="sender-name">{message.sender}</div>
+            )}
+            {parsedMessage.text}
+          </div>
+        </div>
+      );
+    }
+    else if (parsedMessage.videoUrl) {
+     
+      const videoPath = parsedMessage.videoUrl;
+      return (
+        <div
+          key={index}
+          className={`message-container ${
+            message.sender === currentUser ? 'my-message' : 'other-message'
+          }`}
+        >
+          <div
+            className={`message ${
+              message.sender === currentUser ? 'my-message-content' : 'other-message-content'
+            }`}
+          >
+            {message.sender !== currentUser && (
+              <div className="sender-name">{message.sender}</div>
+            )}
+            <div className="video-container">
+              
+          <video controls>
+          <source src={baseUrl+`videos/${videoPath}`} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <a
+              href={ baseUrl+`videos/${videoPath}`}
+              download ={`video_${index}.mp4`} 
+              className="download-link">
+                <i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    else if (parsedMessage.audioUrl) {
+     
+      const audioPath = parsedMessage.audioUrl;
+      return (
+        <div
+          key={index}
+          className={`message-container ${
+            message.sender === currentUser ? 'my-message' : 'other-message'
+          }`}
+        >
+          <div
+            className={`message ${
+              message.sender === currentUser ? 'my-message-content' : 'other-message-content'
+            }`}
+          >
+            {message.sender !== currentUser && (
+              <div className="sender-name">{message.sender}</div>
+            )}
+            <div className="audio-container">
+              
+          <audio controls>
+          <source src={baseUrl+`audios/${audioPath}`} type="video/mp4" />
+          Your browser does not support the video tag.
+        </audio>
+        <a
+              href={ baseUrl+`audios/${audioPath}`}
+              download ={`audio_${index}.mp3`} 
+              className="download-link">
+                <i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  } else {
     return null;
   }
 })}
+
 </div>
       <div style={{ padding: '10px', backgroundColor: '#c3c3c3' }}>
       <Sendmessage onSendMessage={handleSendMessage}  />
@@ -226,4 +283,3 @@ const Chatbox = () => {
 };
 
 export default Chatbox;
-

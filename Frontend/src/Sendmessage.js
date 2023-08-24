@@ -3,13 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, createChatRoom } from './redux/slices/chats'
 import axios from 'axios';
 import { baseUrl } from './helpers';
+import AudioRecorder from './Audiorecorder';
 
 const Sendmessage = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
   const [userDetails, setUserDetails] = useState(null);
   const userlist = useSelector((state) => state.user.userList);
   const selectedUser = useSelector((state) => state.user.selectedUser);
-  const [image, setImage] = useState(null);
+  const [mediaType, setMediaType] = useState(null); 
+  const [imageData, setImageData] = useState(null);
+  const [video, setVideo] = useState(null);
+  const [audio, setAudio] = useState(null);
+
   // const chats = useSelector((state) => state.chat.chats);
 
   const dispatch = useDispatch();
@@ -56,11 +61,71 @@ const Sendmessage = ({ onSendMessage }) => {
     if (selectedImage) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target.result);
+        setImageData(e.target.result);
       };
       reader.readAsDataURL(selectedImage); 
     }
   };
+
+
+  const videoUpload = async (files) => {
+    if (files[0] !== undefined) {
+      const formData = new FormData();
+      formData.append('userfile', files[0]); 
+  
+      const config = {
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        },
+      };
+  
+      try {
+        const response = await axios.post(baseUrl+'api/upload-video', formData, config);
+        console.log(response);
+        console.log(response.data.path);
+        if (response) {
+          setVideo(response.data.path);
+          // console.log('video updated successfully');
+          // alert('Video uploaded successfully');
+        } else {
+          console.error('Failed to upload');
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+
+  const recordAudio = async (audioBlob) => {
+    if (audioBlob !== undefined) {
+      const formData = new FormData();
+      formData.append('audiofile', audioBlob);
+  
+      const config = {
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        },
+      };
+  
+      try {
+        const response = await axios.post(baseUrl+'api/upload-audio', formData, config);
+        console.log(response);
+        console.log(response.data.path);
+        if (response) {
+          
+          setAudio(response.data.path);
+          alert('Please Click Send Button to send audio');
+        } else {
+          console.error('Failed to upload');
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+
 
   const selectedUserId = userlist.find(user => user.name === selectedUser).id;
   // console.log(selectedUserObject);
@@ -70,7 +135,9 @@ const Sendmessage = ({ onSendMessage }) => {
       text: message,
       senderId: userDetails.id,
       receiverId: selectedUserId,
-      imageUrl: image,
+      imageUrl: imageData,
+      videoUrl: video,
+    audioUrl: audio,
     };
 
 
@@ -81,6 +148,8 @@ const Sendmessage = ({ onSendMessage }) => {
           receiverId: selectedUserId,
           message: newMessage.text,
           imageUrl: newMessage.imageUrl,
+          videoUrl: newMessage.videoUrl,
+          audioUrl: newMessage.audioUrl,
         }
         );
 
@@ -89,10 +158,11 @@ const Sendmessage = ({ onSendMessage }) => {
         if (status) {
           dispatch(createChatRoom({ id: chatRoomId, user1: userDetails.id, user2: selectedUser.id }));
           dispatch(addMessage({ ...newMessage, id: messageId }));
-
+          // onSendMessage(newMessage.text, newMessage.imageUrl); 
           onSendMessage(JSON.stringify(newMessage));
           setMessage('');
-          setImage(null);
+          setImageData(null);
+          setVideo(null);
         } else {
           console.error('Failed to create chat room');
         }
@@ -118,21 +188,44 @@ const Sendmessage = ({ onSendMessage }) => {
         height: '40px',
       }}
     >
-      <span style={{ fontSize: '25px', marginRight: '20px' }}>
-        <i className="fa fa-smile-o" aria-hidden="true"></i>
-      </span>
-      <label htmlFor="imageInput" style={{ fontSize: '25px', marginRight: '20px', cursor: 'pointer' }}>
-        <i className="fa fa-paperclip" aria-hidden="true"></i>
-      </label>
-      <input
-        type="file"
-        id="imageInput"
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={imageUpload}
+       <span style={{ fontSize: '25px', marginRight: '20px' }}>
+      <i className="fa fa-smile-o" aria-hidden="true"></i>
+    </span>
 
-      />
+    <label
+  htmlFor="fileInput"
+  style={{ fontSize: '25px', marginRight: '20px', cursor: 'pointer' }}
+>
+  <i
+    className="fa fa-paperclip"
+    aria-hidden="true"
+    onClick={() => {
+      if (!mediaType) {
+        document.getElementById('fileInput').click();
+      }
+    }}
+  ></i>
+</label>
+<input
+  type="file"
+  id="fileInput"
+  accept="image/*, video/*"
+  style={{ display: 'none' }}
+  onChange={(e) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFileType = e.target.files[0].type.startsWith('image') ? 'image' : 'video';
+      setMediaType(selectedFileType);
 
+      if (selectedFileType === 'image') {
+        imageUpload(e);
+      } else if (selectedFileType === 'video') {
+        videoUpload(e.target.files);
+      }
+    } else {
+      setMediaType(null); 
+    }
+  }}
+/>
       <input
         type="text"
         value={message}
@@ -141,13 +234,22 @@ const Sendmessage = ({ onSendMessage }) => {
         placeholder="Type your message..."
         style={inputStyle}
       />
-
+{/* <i class="fa fa-microphone" aria-hidden="true" 
+style={{ marginLeft: '10px', padding: 5, fontSize: '18px' }}>
+  
+</i> */}
+<span>
+<AudioRecorder onRecordingStop={recordAudio} />
+</span>
       <i
         className="fa fa-paper-plane-o"
         aria-hidden="true"
         onClick={send}
+        
         style={{ marginLeft: '10px', padding: 5, fontSize: '18px' }}
-      ></i>
+      >
+        
+      </i>
     </div>
   );
 };

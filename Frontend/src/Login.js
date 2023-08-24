@@ -56,8 +56,6 @@ const Login = () => {
         // console.log(userList);
         const roomUserList = roomDetailsResponse.data.roomDetails;
         // console.log(roomUserList);
-      
-  
         dispatch(fetchUserList({ userList, roomUserList }));
         navigate('/inbox');
       } else {
@@ -66,37 +64,20 @@ const Login = () => {
     } catch (error) {
       console.error(error);
       setError('Login failed');
+     
     }
   };
-  
-  
-  
-  // const roomDetail = async (userId) => {
-  //   try {
-  //     const token = localStorage.getItem('authToken');
-  //     if (token) {
-  //       const response = await axios.get(baseUrl + 'api/room-details', {
-  //         headers: {
-  //           Authorization: token,
-  //         },
-  //       });
-  //       console.log(response);
-  //       dispatch(fetchUserList()); 
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+
   
   return (
     
 <div style={{ backgroundColor: 'rgb(164 164 164)', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <center>
-        <h2>Welcome to App</h2>
+        <h2>Please login to get started</h2>
         <div style={{ height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Card style={{ width: '18rem' }}>
             <Card.Body style={{ backgroundColor: 'rgb(208, 208, 208)', color: 'black' }}>
-              <Card.Title>Please login</Card.Title>
+              <Card.Title>Please Enter Details</Card.Title>
               <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formEmail">
                   <Form.Control type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
