@@ -3,8 +3,8 @@ import {useSelector, useDispatch} from 'react-redux'
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { baseUrl } from "./helpers";
-import { Form, Button } from "react-bootstrap";
-import { setSelectedUser, fetchUserList} from "./redux/slices/user"
+import { Form} from "react-bootstrap";
+import { setSelectedUser} from "./redux/slices/user"
 import './Chatbox.css';
 
 const Inbox = ({setShowChatbox}) => {
@@ -13,9 +13,6 @@ const Inbox = ({setShowChatbox}) => {
   const userlist = useSelector((state) => state.user.userList);
   const roomUserList = useSelector((state)=> state.user.roomUserList);
   const selectedUser = useSelector((state) => state.user.selectedUser);
-  const chattedBefore = roomUserList.length > 0;
-  const [showAddFriends, setShowAddFriends] = useState(false);
-  const [showUserList, setShowUserList] = useState(false);
   const [showRoomUserList, setShowRoomUserList] = useState(false)
   const [currentUser, setCurrentUser] = useState('');
   const [showCurrentUser, setShowCurrentUser] = useState(false);
@@ -43,7 +40,7 @@ const Inbox = ({setShowChatbox}) => {
     getUserDetail();
   })
 
-  const handleUserCircleClick = () => {
+  const userIconClick = () => {
     setShowCurrentUser(!showCurrentUser);
   };
 
@@ -57,7 +54,7 @@ const Inbox = ({setShowChatbox}) => {
           },
         });
 
-        const { status, userDetails } = response.data;
+        const { userDetails } = response.data;
         setCurrentUser(userDetails.name);
       } catch (error) {
         console.error('Error', error);
@@ -65,9 +62,6 @@ const Inbox = ({setShowChatbox}) => {
     }
   };
 
-const currentName = () =>{
-  setCurrentUser(currentUser) 
-}
 
   return (
     <div className="inbox">
@@ -93,7 +87,7 @@ const currentName = () =>{
                     display: "flex",
                     alignItems: "center",
                   }}
-                  onClick={handleUserCircleClick}>
+                  onClick={userIconClick}>
                 </i>
                 {showCurrentUser && (
             <h7 style={{  color:'black' }}>
@@ -111,14 +105,14 @@ const currentName = () =>{
            <h7 
            style={{marginRight:"40px", color: "black"}}
            ><b>Start ChatOn</b></h7>
-          <i
+          {/* <i
             className="fa fa-users"
             style={{ fontSize: "18px", color: "black", marginRight: "10px" }}
             onClick={() => {
               setShowRoomUserList(false);
               setShowUserList(true);
             }}
-          ></i>
+          ></i> */}
          
           {/* <img
             src={"concentric.png"}
@@ -152,12 +146,12 @@ const currentName = () =>{
           style={{
             display: "flex",
             alignItems: "center",
-            paddingRight: "30px",
+            // paddingRight: "30px",
             background: "#c3c3c3",
             border: "1px solid #ccc",
             borderRadius: "5px",
             position: "relative",
-            width: "100%",
+            width: "93%",
             
           }}
         >
@@ -184,12 +178,13 @@ const currentName = () =>{
               paddingLeft: "30px",
               width: "100%",
               background: "#c3c3c3",
+              marginRight:'10px'
             }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div
+        {/* <div
           className="filter-icon"
           style={{ marginLeft: "10px", position: "relative" }}
         >
@@ -202,7 +197,7 @@ const currentName = () =>{
               setShowUserList(false);
             }}
           ></i>
-        </div>
+        </div> */}
       </Form>
       <div
         className="user-list-container"
@@ -248,17 +243,17 @@ const currentName = () =>{
                   </div>
                 </div>
               </div>
-              <div
+              {/* <div
                       style={{ alignSelf: "flex-end", marginRight: "10px" }}
                       className="d-flex align-items-center"
                     >
-                      {/* <Button
+                      <Button
                         variant="dark"
                         onClick={() => addChat(user.name)}
                       >
                         Add
-                      </Button> */}
-                    </div>
+                      </Button>
+                    </div> */}
             </li>
           ))}
         </ul>

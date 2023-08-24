@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
 import Sendmessage from './Sendmessage';
-import { addMessage } from './redux/slices/chats';
+import { addMessage, clearChat } from './redux/slices/chats';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { baseUrl } from './helpers';
 import './Chatbox.css'; 
+import moment from "moment";
 
 const Chatbox = () => {
   const dispatch = useDispatch();
@@ -74,6 +74,11 @@ const Chatbox = () => {
     dispatch(addMessage(newMessage));
   };
 
+
+  useEffect(() => {
+    dispatch(clearChat());
+  }, [selectedUser, dispatch]);
+
   useEffect(()=>{
     getUserDetail();
   }
@@ -89,7 +94,7 @@ const Chatbox = () => {
           },
         });
 
-        const { status, userDetails } = response.data;
+        const { userDetails } = response.data;
         setCurrentUser(userDetails.name);
       } catch (error) {
         console.error('Error', error);
@@ -156,6 +161,7 @@ const Chatbox = () => {
   }
 
   if (parsedMessage) {
+    const messageTime = moment().format('LT'); 
     if (parsedMessage.imageUrl) {
       return (
         <div
@@ -173,6 +179,7 @@ const Chatbox = () => {
               <div className="sender-name">{message.sender}</div>
             )}
             <img src={parsedMessage.imageUrl} alt="Received Image" className="received-image" />
+            <div className="message-timestamp">{messageTime}</div>
           </div>
         </div>
       );
@@ -194,6 +201,7 @@ const Chatbox = () => {
               <div className="sender-name">{message.sender}</div>
             )}
             {parsedMessage.text}
+            <div className="message-timestamp">{messageTime}</div>
           </div>
         </div>
       );
@@ -229,6 +237,7 @@ const Chatbox = () => {
                 <i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i>
               </a>
             </div>
+            <div className="message-timestamp">{messageTime}</div>
           </div>
         </div>
       );
@@ -265,6 +274,7 @@ const Chatbox = () => {
                 <i class="fa fa-arrow-circle-o-down" aria-hidden="true"></i>
               </a>
             </div>
+            <div className="message-timestamp">{messageTime}</div>
           </div>
         </div>
       );

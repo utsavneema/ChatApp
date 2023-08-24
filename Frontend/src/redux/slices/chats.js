@@ -1,30 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { baseUrl } from '../../helpers';
 
 const initialState = {
   chats: [],
 };
-
-export const fetchChats = createAsyncThunk("user/fetchchats", async (receiverId) => {
-  const token = localStorage.getItem("authToken");
-  if (token) {
-    try {
-      const response = await axios.get(baseUrl + "api/chat-details", {
-        headers: {
-          Authorization: token,
-        },
-        params: {
-          receiverId: receiverId,
-        },
-      });
-      return response.data.chatDetails;
-    } catch (error) {
-      throw new Error(error.response.data);
-    }
-  }
-});
 
 const chatSlice = createSlice({
   name: 'chat',
@@ -40,6 +18,11 @@ const chatSlice = createSlice({
       if (existingMessageIndex === -1) {
         state.chats.push(action.payload);
       }
+
+    },
+
+    clearChat: (state) => {
+      state.chats = [];
     },
 
     createChatRoom: (state, action) => {
@@ -58,13 +41,8 @@ const chatSlice = createSlice({
       }
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(fetchChats.fulfilled, (state, action) => {
-      state.chats = action.payload;
-    });
-  },
 });
 
-export const { addMessage, createChatRoom } = chatSlice.actions;
+export const { addMessage, createChatRoom, clearChat } = chatSlice.actions;
 
 export default chatSlice.reducer;

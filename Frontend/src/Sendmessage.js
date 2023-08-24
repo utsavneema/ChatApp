@@ -4,6 +4,7 @@ import { addMessage, createChatRoom } from './redux/slices/chats'
 import axios from 'axios';
 import { baseUrl } from './helpers';
 import AudioRecorder from './Audiorecorder';
+import  EmojiPicker  from 'emoji-picker-react';
 
 const Sendmessage = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
@@ -14,6 +15,8 @@ const Sendmessage = ({ onSendMessage }) => {
   const [imageData, setImageData] = useState(null);
   const [video, setVideo] = useState(null);
   const [audio, setAudio] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState(null);
 
   // const chats = useSelector((state) => state.chat.chats);
 
@@ -125,7 +128,11 @@ const Sendmessage = ({ onSendMessage }) => {
     }
   };
 
-
+  const handleEmojiClick = (emojiObject) => {
+    setSelectedEmoji(emojiObject.emoji);
+    setMessage(message + emojiObject.emoji); 
+    setShowEmojiPicker(false); 
+  };
 
   const selectedUserId = userlist.find(user => user.name === selectedUser).id;
   // console.log(selectedUserObject);
@@ -188,10 +195,21 @@ const Sendmessage = ({ onSendMessage }) => {
         height: '40px',
       }}
     >
-       <span style={{ fontSize: '25px', marginRight: '20px' }}>
-      <i className="fa fa-smile-o" aria-hidden="true"></i>
-    </span>
+      {showEmojiPicker && (
+        <div style={{ position: 'absolute', bottom: '60px', right: '10px' }}>
+          <EmojiPicker onEmojiClick={handleEmojiClick} />
+        </div>
+      )}
 
+      <span
+        style={{ fontSize: '25px', marginRight: '20px', cursor: 'pointer' }}
+        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+      >
+        <i className="fa fa-smile-o" aria-hidden="true"></i>
+      </span>
+
+
+    
     <label
   htmlFor="fileInput"
   style={{ fontSize: '25px', marginRight: '20px', cursor: 'pointer' }}
@@ -217,8 +235,10 @@ const Sendmessage = ({ onSendMessage }) => {
       setMediaType(selectedFileType);
 
       if (selectedFileType === 'image') {
+        alert('Please Click Send Button to send Image');
         imageUpload(e);
       } else if (selectedFileType === 'video') {
+        alert('Please Click Send Button to send video');
         videoUpload(e.target.files);
       }
     } else {
@@ -234,10 +254,7 @@ const Sendmessage = ({ onSendMessage }) => {
         placeholder="Type your message..."
         style={inputStyle}
       />
-{/* <i class="fa fa-microphone" aria-hidden="true" 
-style={{ marginLeft: '10px', padding: 5, fontSize: '18px' }}>
-  
-</i> */}
+      
 <span>
 <AudioRecorder onRecordingStop={recordAudio} />
 </span>
