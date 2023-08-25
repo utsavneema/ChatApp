@@ -10,7 +10,8 @@
   }
   
   .my-message-content {
-    background-color: #DCF8C6;
+    background-color: 
+        #DCF8C6;
   }
   
   .other-message {
@@ -19,7 +20,9 @@
   }
   
   .other-message-content {
-    background-color: #E5E5EA;
+    background-color: 
+    /* #b9bb5a */
+    #E5E5EA;
   }
   
   .message {
@@ -63,4 +66,38 @@
     color: black; 
     font-weight: bold;
   }
-  
+
+  /* Add this to your existing CSS or style file */
+.chat-details {
+  flex: 1;
+}
+
+.last-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.last-message-content {
+  flex: 1;
+}
+
+.last-message-timestamp {
+  margin-left: 10px;
+  margin-right: 8px;
+  color: black;
+  /* font-weight: bold; */
+  font-size: 15px;
+}
+
+/* .scroll-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scroll-buttons i {
+  font-size: 24px;
+  cursor: pointer;
+  margin: 5px;
+} */

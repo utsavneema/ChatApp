@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   chats: [],
+  lastMessages: {}, 
 };
 
 const chatSlice = createSlice({
@@ -9,6 +10,8 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     addMessage: (state, action) => {
+      const { sender,recipient, text,imageUrl, videoUrl, audioUrl } = action.payload;
+      
       const existingMessageIndex = state.chats.findIndex(
         (message) =>
           message.text === action.payload.text &&
@@ -19,6 +22,22 @@ const chatSlice = createSlice({
         state.chats.push(action.payload);
       }
 
+      // state.lastMessages[sender] = text;
+      // state.lastMessages[recipient] = text;
+      const lastMessageContent = imageUrl ? "image" : videoUrl ? "video" : audioUrl ? "audio" : text;
+  
+  // state.lastMessages[sender] = lastMessageContent;
+  // state.lastMessages[recipient] = lastMessageContent;
+
+  state.lastMessages[sender] = {
+    content: lastMessageContent,
+    timestamp: action.payload.created_at,
+  };
+  state.lastMessages[recipient] = {
+    content: lastMessageContent,
+    timestamp: action.payload.created_at,
+  };
+  
     },
 
     clearChat: (state) => {

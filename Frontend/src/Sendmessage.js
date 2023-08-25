@@ -5,6 +5,7 @@ import axios from 'axios';
 import { baseUrl } from './helpers';
 import AudioRecorder from './Audiorecorder';
 import  EmojiPicker  from 'emoji-picker-react';
+import moment from 'moment';
 
 const Sendmessage = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
@@ -128,7 +129,7 @@ const Sendmessage = ({ onSendMessage }) => {
     }
   };
 
-  const handleEmojiClick = (emojiObject) => {
+  const selectEmoji = (emojiObject) => {
     setSelectedEmoji(emojiObject.emoji);
     setMessage(message + emojiObject.emoji); 
     setShowEmojiPicker(false); 
@@ -145,19 +146,12 @@ const Sendmessage = ({ onSendMessage }) => {
       imageUrl: imageData,
       videoUrl: video,
     audioUrl: audio,
+    created_at: moment().format('h:mm A'),
     };
 
 
       try {
-        const response = await axios.post(baseUrl + 'api/chats', 
-        {
-          senderId: userDetails.id,
-          receiverId: selectedUserId,
-          message: newMessage.text,
-          imageUrl: newMessage.imageUrl,
-          videoUrl: newMessage.videoUrl,
-          audioUrl: newMessage.audioUrl,
-        }
+        const response = await axios.post(baseUrl + 'api/chats', newMessage
         );
 
         const { status, chatRoomId, messageId } = response.data;
@@ -197,7 +191,7 @@ const Sendmessage = ({ onSendMessage }) => {
     >
       {showEmojiPicker && (
         <div style={{ position: 'absolute', bottom: '60px', right: '10px' }}>
-          <EmojiPicker onEmojiClick={handleEmojiClick} />
+          <EmojiPicker onEmojiClick={selectEmoji} />
         </div>
       )}
 

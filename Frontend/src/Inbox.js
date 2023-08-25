@@ -5,43 +5,46 @@ import axios from "axios";
 import { baseUrl } from "./helpers";
 import { Form} from "react-bootstrap";
 import { setSelectedUser} from "./redux/slices/user"
+import moment from "moment";
 import './Chatbox.css';
 
 const Inbox = ({setShowChatbox}) => {
   // const chats = useSelector((state) => state.chat.chats);
   const dispatch = useDispatch();
   const userlist = useSelector((state) => state.user.userList);
-  const roomUserList = useSelector((state)=> state.user.roomUserList);
+  // const roomUserList = useSelector((state)=> state.user.roomUserList);
   const selectedUser = useSelector((state) => state.user.selectedUser);
-  const [showRoomUserList, setShowRoomUserList] = useState(false)
+  const lastMessages = useSelector((state) => state.chat.lastMessages);
+  // const [showRoomUserList, setShowRoomUserList] = useState(false)
   const [currentUser, setCurrentUser] = useState('');
   const [showCurrentUser, setShowCurrentUser] = useState(false);
-
- 
-  const [searchQuery, setSearchQuery] = useState('')
+  const [search, setSearch] = useState('')
   const [filteredUserList, setFilteredUserList] = useState(userlist);
+
+  useEffect(() => {
+    const filteredUsers = userlist.filter((user) =>
+      user.name.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredUserList(filteredUsers);
+  }, [search, userlist]);
+
+  // useEffect(() => {
+  //   setFilteredUserList(showRoomUserList ? roomUserList : userlist);
+  // }, [showRoomUserList, roomUserList, userlist]);
+
+  useEffect(()=>{
+    setFilteredUserList(userlist)
+    getUserDetail();
+  }, [userlist])
+
+  
+  const userIconClick = () => {
+    setShowCurrentUser(!showCurrentUser);
+  };
 
   const addChat = (userName) => {
     dispatch(setSelectedUser(userName))
     setShowChatbox(true);
-  };
-
-  useEffect(() => {
-    const filteredUsers = userlist.filter((user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredUserList(filteredUsers);
-  }, [searchQuery, userlist]);
-
-  useEffect(() => {
-    setFilteredUserList(showRoomUserList ? roomUserList : userlist);
-  }, [showRoomUserList, roomUserList, userlist]);
-  useEffect(()=>{
-    getUserDetail();
-  })
-
-  const userIconClick = () => {
-    setShowCurrentUser(!showCurrentUser);
   };
 
   const getUserDetail = async () => {
@@ -80,10 +83,8 @@ const Inbox = ({setShowChatbox}) => {
                   style={{
                     fontSize: "18px",
                     color: "black",
-                    // width: "50px",
                     height: "30px",
                     borderRadius: "50%",
-                    // marginRight: "10px",
                     display: "flex",
                     alignItems: "center",
                   }}
@@ -104,7 +105,7 @@ const Inbox = ({setShowChatbox}) => {
         >
            <h7 
            style={{marginRight:"40px", color: "black"}}
-           ><b>Start ChatOn</b></h7>
+           ><b>Start LiveChat</b></h7>
           {/* <i
             className="fa fa-users"
             style={{ fontSize: "18px", color: "black", marginRight: "10px" }}
@@ -146,7 +147,6 @@ const Inbox = ({setShowChatbox}) => {
           style={{
             display: "flex",
             alignItems: "center",
-            // paddingRight: "30px",
             background: "#c3c3c3",
             border: "1px solid #ccc",
             borderRadius: "5px",
@@ -180,8 +180,8 @@ const Inbox = ({setShowChatbox}) => {
               background: "#c3c3c3",
               marginRight:'10px'
             }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         {/* <div
@@ -207,56 +207,52 @@ const Inbox = ({setShowChatbox}) => {
           overflowY: "auto",
         }}
       >
-        <ul className="list-group">
-          {filteredUserList.map((user) => (
-            <li
-              key={user.id}
-              className="py-2 border-bottom cursor-pointer d-flex align-items-center"
-              onClick={() => addChat(user.name)}
-            >
-                <i
-                  className="fa fa-user-circle-o"
-                  aria-hidden="true"
-                  style={{
-                    fontSize: "18px",
-                    color: "black",
-                    width: "50px",
-                    height: "50px",
-                    
-                    borderRadius: "50%",
-                    
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                ></i>
+<ul className="list-group">
+  {filteredUserList.map((user) => (
+    <li
+      key={user.id}
+      className="py-2 border-bottom cursor-pointer d-flex align-items-center"
+      onClick={() => addChat(user.name)}
+    >
+      <i
+        className="fa fa-user-circle-o"
+        aria-hidden="true"
+        style={{
+          fontSize: "18px",
+          color: "black",
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+        }}
+      ></i>
 
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div className={`chat-username ${selectedUser === user.name ? 'selected-user' : ''}`}>
-                    {user.name}
-                  </div>
-                </div>
-              </div>
-              {/* <div
-                      style={{ alignSelf: "flex-end", marginRight: "10px" }}
-                      className="d-flex align-items-center"
-                    >
-                      <Button
-                        variant="dark"
-                        onClick={() => addChat(user.name)}
-                      >
-                        Add
-                      </Button>
-                    </div> */}
-            </li>
-          ))}
-        </ul>
+      <div className="chat-details" style={{ flex: 1 }}>
+        <div className={`chat-username ${selectedUser === user.name ? 'selected-user' : ''}`}>
+          {user.name}
+        </div>
+        {lastMessages[user.name] && (
+          <div className="last-message">
+            <span className="last-message-content">
+              {JSON.parse(lastMessages[user.name].content).imageUrl ? "Image" :
+               JSON.parse(lastMessages[user.name].content).videoUrl ? "Video" :
+               JSON.parse(lastMessages[user.name].content).audioUrl ? "Audio" :
+               JSON.parse(lastMessages[user.name].content).text}
+            </span>
+            <span className="last-message-timestamp">
+              {moment(lastMessages[user.name].timestamp).format('LT')}
+            </span>
+          </div>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
+
+
+
+
       </div>
           </div>
   );

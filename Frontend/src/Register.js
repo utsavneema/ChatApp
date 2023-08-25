@@ -47,7 +47,7 @@ const Register = () => {
               flexDirection: 'column',
             }}
           >
-          <h2>Welcome to ChatOn</h2>
+          <h2>Welcome to LiveChat</h2>
           <br/> <br/>
             <h4>Please Register</h4>
             <br/>

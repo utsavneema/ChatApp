@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Sendmessage from './Sendmessage';
 import { addMessage, clearChat } from './redux/slices/chats';
@@ -10,7 +10,7 @@ import moment from "moment";
 
 const Chatbox = () => {
   const dispatch = useDispatch();
-  // const [message, setMessage] = useState('');
+  const chatboxRef = useRef(null);
   const chats = useSelector((state) => state.chat.chats);
   const selectedUser = useSelector((state) => state.user.selectedUser);
   const [currentUser, setCurrentUser] = useState('');
@@ -29,7 +29,13 @@ const Chatbox = () => {
   
     newSocket.addEventListener('message', function (event) {
       const receivedMessage = JSON.parse(event.data);
+      console.log(receivedMessage);
       if (receivedMessage) {
+
+        if (receivedMessage) {
+    const { sender, text } = receivedMessage;
+    dispatch(addMessage({ sender, message: { text } }));
+  }
         if (receivedMessage.imageUrl) {
           dispatch(addMessage({ imageUrl: receivedMessage.imageUrl, sender: receivedMessage.sender }));
         }
@@ -43,6 +49,7 @@ const Chatbox = () => {
         dispatch(addMessage({ text: receivedMessage.text, sender: receivedMessage.sender }));
         }
       }
+      scrollToBottom();
     });
     
 
@@ -67,8 +74,25 @@ const Chatbox = () => {
     };
   }, []);
 
+  const scrollToBottom = () => {
+    if (chatboxRef.current) {
+      chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+    }
+  };
+ 
+  
+  useEffect(() => {
+    scrollToBottom();
+   
+  }, [chats]);
+
+  // useEffect(() => {
+  //   scrollToBottom();
+  //   handleScroll(); // Initially check if user is at the bottom
+  // }, [chats]);
+
   const handleSendMessage = (text, imageUrl, videoUrl, audioUrl) => {
-    const newMessage = { text, imageUrl, videoUrl,audioUrl, sender: currentUser };
+    const newMessage = { text, imageUrl, videoUrl,audioUrl,created_at: moment().format('h:mm A'),sender: currentUser };
     socket?.send(JSON.stringify(newMessage));
     console.log('Dispatching to Redux:', newMessage);
     dispatch(addMessage(newMessage));
@@ -101,7 +125,7 @@ const Chatbox = () => {
       }
     }
   };
-  
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '95vh' }}>
@@ -151,7 +175,7 @@ const Chatbox = () => {
           ></div> */}
         </Link>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
+      <div ref={chatboxRef}  style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
       {chats.map((message, index) => {
   let parsedMessage;
   try {
@@ -161,7 +185,8 @@ const Chatbox = () => {
   }
 
   if (parsedMessage) {
-    const messageTime = moment().format('LT'); 
+    const messageTime = moment(parsedMessage.created_at, 'h:mm A').format('h:mm A');
+ 
     if (parsedMessage.imageUrl) {
       return (
         <div
@@ -285,9 +310,25 @@ const Chatbox = () => {
 })}
 
 </div>
-      <div style={{ padding: '10px', backgroundColor: '#c3c3c3' }}>
-      <Sendmessage onSendMessage={handleSendMessage}  />
-      </div>
+{/* <div className="scroll-buttons" style={{ background: 'transparent', position: 'fixed', bottom: '80px', right: '65px', borderRadius: '40%', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.3)', 
+    padding:'5px', height:'25px', width:'25px' }}>
+  <i
+    className="fa fa-angle-double-down"
+    aria-hidden="true"
+    onClick={scrollToBottom}
+    style={{ fontSize: '25px', color: 'black' }}
+  ></i>
+</div> */}
+
+
+
+
+<div style={{ padding: '10px', backgroundColor: '#c3c3c3', display: 'flex', alignItems: 'center' }}>
+  <Sendmessage onSendMessage={handleSendMessage} />
+  
+</div>
+
+
     </div>
   );
 };
