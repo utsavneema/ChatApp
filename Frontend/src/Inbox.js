@@ -241,7 +241,7 @@ const Inbox = ({setShowChatbox}) => {
                JSON.parse(lastMessages[user.name].content).text}
             </span>
             <span className="last-message-timestamp">
-              {moment(lastMessages[user.name].timestamp).format('LT')}
+            {moment(lastMessages[user.name].timestamp).format('LT')}
             </span>
           </div>
         )}

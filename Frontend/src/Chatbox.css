@@ -1,73 +1,77 @@
 .message-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-  }
-  
-  .my-message {
-    justify-content: flex-end;
-    text-align: right;
-  }
-  
-  .my-message-content {
-    background-color: 
-        #DCF8C6;
-  }
-  
-  .other-message {
-    justify-content: flex-start;
-    text-align: left;
-  }
-  
-  .other-message-content {
-    background-color: 
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.my-message {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.my-message-content {
+  background-color:
+    #DCF8C6;
+}
+
+.other-message {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.other-message-content {
+  background-color:
     /* #b9bb5a */
     #E5E5EA;
-  }
-  
-  .message {
-    padding: 8px 12px;
-    border-radius: 10px;
-    max-width: 70%;
-    word-wrap: break-word;
-  }
-  
-  .sender-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
+}
 
-  .video-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px; /* Adjust as needed */
-  }
-  
-  .video-container video {
-    max-width: 100%; /* Ensure video doesn't exceed its container */
-  }
-  
-  .download-link {
-    font-size: 30px; /* Adjust the font size as needed */
-    margin-top: 10px; /* Adjust spacing between video and download link */
-  }
-  
+.message {
+  padding: 8px 12px;
+  border-radius: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
 
-  .audio-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-  }
+.sender-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
 
-  .selected-user {
-    color: black; 
-    font-weight: bold;
-  }
+.video-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  /* Adjust as needed */
+}
 
-  /* Add this to your existing CSS or style file */
+.video-container video {
+  max-width: 100%;
+  /* Ensure video doesn't exceed its container */
+}
+
+.download-link {
+  font-size: 30px;
+  /* Adjust the font size as needed */
+  margin-top: 10px;
+  /* Adjust spacing between video and download link */
+}
+
+
+.audio-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+
+.selected-user {
+  color: black;
+  font-weight: bold;
+}
+
+/* Add this to your existing CSS or style file */
 .chat-details {
   flex: 1;
 }
@@ -91,13 +95,13 @@
 }
 
 /* .scroll-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+display: flex;
+flex-direction: column;
+align-items: center;
 }
 
 .scroll-buttons i {
-  font-size: 24px;
-  cursor: pointer;
-  margin: 5px;
+font-size: 24px;
+cursor: pointer;
+margin: 5px;
 } */

@@ -2,14 +2,14 @@ const express = require("express");
 // const expressWs = require("express-ws");
 // const WebSocket = require("ws");
 const router = express.Router();
-const dotenv= require('dotenv');
+const dotenv = require('dotenv');
 const mysql = require("mysql");
 const moment = require("moment");
 const _ = require("lodash");
 const path = require("path");
 const fs = require("fs");
 const ExcelJs = require('exceljs');
-const jwt = require ('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const jwtKey = 'hello';
 const cors = require('cors');
 const http = require("http");
@@ -26,17 +26,17 @@ wss.on('connection', function connection(ws) {
     try {
       const parsedMessage = JSON.parse(message);
 
-      
+
       if (parsedMessage.imageUrl && parsedMessage.sender) {
         // console.log('Received image message from', parsedMessage.sender);
-      }else if(parsedMessage.videoUrl && parsedMessage.sender){
+      } else if (parsedMessage.videoUrl && parsedMessage.sender) {
         console.log('Received video message from', parsedMessage.sender);
-      } 
-      else if(parsedMessage.audioUrl && parsedMessage.sender){
+      }
+      else if (parsedMessage.audioUrl && parsedMessage.sender) {
         console.log('Received audio message from', parsedMessage.sender);
-      } 
+      }
       else if (parsedMessage.text && parsedMessage.sender) {
-        
+
         // console.log('Received plain text message from', parsedMessage.sender, ':', parsedMessage.text);
       }
 
@@ -88,32 +88,32 @@ function dbSelect(sql, param) {
 function dbInsert(sql, params) {
   return new Promise((resolve, reject) => {
     con.query(
-      sql, 
-      params, 
+      sql,
+      params,
       (error, result) => {
-      if (error) {
-        console.error(error);
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
+        if (error) {
+          console.error(error);
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
   });
 }
 
 function dbDelete(sql, params) {
   return new Promise((resolve, reject) => {
     con.query(
-      sql, 
-      params, 
+      sql,
+      params,
       (error, result) => {
-      if (error) {
-        console.error(error);
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
+        if (error) {
+          console.error(error);
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
   });
 }
 
@@ -126,13 +126,13 @@ router.post("/register", async function (req, res, next) {
   try {
     let existingSql = 'select id from users where email =?'
     let existingUser = await dbSelect(`${existingSql}`, [email]);
-    if (existingUser.length >0) {
-        return res.status(401).json({status: false, error: "already exists"})
+    if (existingUser.length > 0) {
+      return res.status(401).json({ status: false, error: "already exists" })
     }
 
     let sql = "insert into users (name, email, password) values (?, ?, ?)";
     const user = await dbInsert(`${sql}`, [name, email, password]);
-    return res.status(200).json({ status:true, message: "user inserted" });
+    return res.status(200).json({ status: true, message: "user inserted" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ status: false, error: "Failed to insert user" });
@@ -145,15 +145,15 @@ router.post("/login", async function (req, res, next) {
   const password = _.get(req, "body.password");
 
   try {
-    let sql = "SELECT * FROM users WHERE email = ? AND password = ?"; 
+    let sql = "SELECT * FROM users WHERE email = ? AND password = ?";
     const user = await dbSelect(sql, [email, password]);
 
     if (user.length === 0) {
       return res.status(401).json({ status: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user[0].id}, jwtKey);
+    const token = jwt.sign({ id: user[0].id }, jwtKey);
 
-    return res.status(200).json({ status: true, token: token, user: user[0] }); 
+    return res.status(200).json({ status: true, token: token, user: user[0] });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ status: false, error: "Failed to perform login" });
@@ -162,16 +162,16 @@ router.post("/login", async function (req, res, next) {
 //************************************************************************************************* */
 async function authMiddleWare(req, res, next) {
   try {
-    const token = _.get(req, 'headers.authorization', ''); 
+    const token = _.get(req, 'headers.authorization', '');
     // console.log(token, 'tokennnnnnn');
 
     if (!token) {
-      return res.status(401).json("token nahi mila"); 
+      return res.status(401).json("token nahi mila");
     } else {
       const decodedToken = jwt.verify(token, jwtKey);
       // console.log(decodedToken, "decoded");
-      
-      let sql = 'SELECT * FROM users WHERE id = ?'; 
+
+      let sql = 'SELECT * FROM users WHERE id = ?';
       const users = await dbSelect(sql, [decodedToken.id]);
       // console.log(users, "========================");
 
@@ -181,27 +181,27 @@ async function authMiddleWare(req, res, next) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const newUser = { ...user, password:undefined };
+      const newUser = { ...user, password: undefined };
       // console.log(newUser);
-      req.userDetails = newUser; 
+      req.userDetails = newUser;
       next();
     }
   } catch (error) {
     console.log(error);
-    return res.status(401).json("Invalid token."); 
+    return res.status(401).json("Invalid token.");
   }
 }
 //----------------------------------------------------------------------------------------------------------
 router.get('/auth', authMiddleWare, (req, res) => {
-  const userDetails = req.userDetails; 
+  const userDetails = req.userDetails;
   // console.log(userDetails);
   return res.json({ status: true, userDetails });
 });
 //---------------------------------------------------------------------------------------------------------
 router.get("/user-list", authMiddleWare, async function (req, res, next) {
   try {
-    const loggedInUser = req.userDetails; 
-    const sql = "SELECT * FROM users WHERE id != ?"; 
+    const loggedInUser = req.userDetails;
+    const sql = "SELECT * FROM users WHERE id != ?";
     const userDetails = await dbSelect(sql, [loggedInUser.id]);
 
     return res.status(200).json({ status: true, userDetails });
@@ -245,11 +245,14 @@ router.post("/upload-audio", function (req, res, next) {
 
 //******************************************************************************************************************************* */
 router.post("/chats", async function (req, res, next) {
-  const senderId = _.get(req, "body.senderId");
-  const receiverId = _.get(req, "body.receiverId");
-  const message = _.get(req, "body.message");
+  const senderId = _.get(req, "body.sender_id");
+  const receiverId = _.get(req, "body.receiver_id");
+  const message = _.get(req, "body.text");
+  // console.log(message, "-------------------------------");
   const created_at = moment().format('YYYY-MM-DD HH:mm:ss');
   const imageUrl = _.get(req, "body.imageUrl")
+  const video = _.get(req, "body.videoUrl")
+  const audio = _.get(req, "body.audioUrl")
   // console.log(receiverId);
 
   try {
@@ -266,8 +269,8 @@ router.post("/chats", async function (req, res, next) {
       chatRoomId = chatRoom.insertId;
     }
 
-    sql = "insert into message (sender_id, receiver_id, room_id, text, created_at, image) values (?,?,?,?,?,?)";
-    const messageResult = await dbInsert(sql, [senderId, receiverId, chatRoomId, message, created_at, imageUrl]);
+    sql = "insert into message (sender_id, receiver_id, room_id, text, created_at, image, video, audio) values (?,?,?,?,?,?,?,?)";
+    const messageResult = await dbInsert(sql, [senderId, receiverId, chatRoomId, message, created_at, imageUrl, video, audio]);
 
     const messageId = messageResult.insertId;
 
@@ -278,6 +281,26 @@ router.post("/chats", async function (req, res, next) {
   }
 });
 //******************************************************************************************************************* */
+router.get("/chat-details", async function (req, res, next) {
+  const user1 = req.query.user1;
+  const user2 = req.query.user2;
+
+  try {
+    const sql = `
+      SELECT *
+      FROM message
+      WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
+    `;
+    const chatHistory = await dbSelect(sql, [user1, user2, user2, user1]);
+
+    return res.status(200).json(chatHistory);
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    return res.status(500).json({ error: 'Failed to fetch chat history' });
+  }
+});
+
+//************************************************************************************************************************** */
 module.exports = router;
 
 const port = 8000;
